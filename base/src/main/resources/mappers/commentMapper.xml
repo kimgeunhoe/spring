@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.www.repository.CommentDAO">
+<insert id="insert" parameterType="cvo">
+	insert into comment(pno, writer, content) values(#{pno}, #{writer}, #{content})
+</insert>
+<select id="selectList" resultType="cvo">
+	select a.cno, writer, content, mod_at from
+	(select cno from comment where pno = #{pno} limit #{pgvo.pageStart}, #{pgvo.qty}) a left join comment b on a.cno = b.cno
+</select>
+<select id="selectTotalCount" resultType="int">
+	select count(cno) from comment where pno = #{pno}
+</select>
+<select id="selectPno" resultType="long">
+	select pno from comment where cno = #{cno}
+</select>
+<update id="update" parameterType="cvo">
+	update comment set content = #{content}, mod_at = now() where cno = #{cno}
+</update>
+<delete id="delete" parameterType="long">
+	delete from comment where cno = #{cno}
+</delete>
+</mapper> 
