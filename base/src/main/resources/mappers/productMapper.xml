@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.www.repository.ProductDAO">
+	<sql id="wh_pno">
+		where pno = #{pno}
+	</sql>
+	<sql id="search">
+		<if test="type!=null">
+			<trim prefix="and (" suffix=")" prefixOverrides="or">
+				<foreach collection="typeToArray" item="type">
+					<trim prefix="or">
+						<choose>
+							<when test="type=='t'.toString()">
+								pname like concat('%', #{kw}, '%')
+							</when>
+							<when test="type=='w'.toString()">
+								writer like concat('%', #{kw}, '%')
+							</when>
+							<when test="type=='c'.toString()">
+								description like concat('%', #{kw}, '%')
+							</when>
+						</choose>
+					</trim>
+				</foreach>
+			</trim>
+		</if>
+	</sql>
+	<insert id="insert" parameterType="pvo">
+		insert into product(category,
+		pname, price, writer, description, made_by, file_count)
+		values(#{category},
+		#{pname}, #{price}, #{writer}, #{description},
+		#{madeBy}, #{fileCount})
+	</insert>
+	<select id="selectList" parameterType="pgvo" resultType="pvo">
+		select a.pno, category, pname, price, writer, mod_at, read_count,
+		cmt_qty, file_count
+		from (select pno from product where pno > 0
+		<include refid="search" />
+		order by pno desc limit #{pageStart}, #{qty}) a left join product b on
+		a.pno = b.pno
+	</select>
+	<select id="selectOne" resultType="pvo">
+		select * from product
+		<include refid="wh_pno" />
+	</select>
+	<select id="selectTotalCount" parameterType="pgvo" resultType="int">
+		select count(pno) from product where pno > 0 <include refid="search" />
+	</select>
+	<select id="selectLastPno" resultType="long">
+		select max(pno) from product
+	</select>
+	<update id="update" parameterType="pvo">
+		update product set category = #{category}, pname = #{pname}, price =
+		#{price}, description = #{description},
+		made_by = #{madeBy}, mod_at =
+		now(), file_count = file_count + #{fileCount}
+		<include refid="wh_pno" />
+	</update>
+	<update id="updateReadCount">
+		update product set read_count = read_count + #{i} <include refid="wh_pno" /> 
+	</update>
+	<update id="updateCmtQty">
+		update product set cmt_qty = cmt_qty + #{i} <include refid="wh_pno" /> 
+	</update>
+	<delete id="delete">
+		delete from product
+		<include refid="wh_pno" />
+	</delete>
+</mapper>
