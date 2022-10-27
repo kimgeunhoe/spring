@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.www.repository.MemberDAO">
+	<sql id="wh_email">
+		where email = #{email}
+	</sql>
+	<sql id="search">
+		<if test="type!=null">
+			<trim prefix="and (" suffix=")" prefixOverrides="or">
+				<foreach collection="typeToArray" item="type">
+					<trim prefix="or">
+						<choose>
+							<when test="type=='e'.toString()">
+								email like concat('%', #{kw}, '%')
+							</when>
+							<when test="type=='n'.toString()">
+								nickname like concat('%', #{kw}, '%')
+							</when>
+							<when test="type=='g'.toString()">
+								grade like concat('%', #{kw}, '%')
+							</when>
+						</choose>
+					</trim>
+				</foreach>
+			</trim>
+		</if>
+	</sql>
+	<insert id="insert" parameterType="mvo">
+		insert into member(email, pwd, nick_name) values (#{email}, #{pwd}, #{nickName})
+	</insert>
+	<insert id="insertAuth">
+		insert into auth_member values(#{email}, 'ROLE_USER')
+	</insert>
+	<select id="login" parameterType="mvo" resultType="mvo">
+		select email, nick_name, last_login, grade from member
+		<include refid="wh_email" />
+		and pwd = #{pwd}
+	</select>
+	<select id="selectAuth" resultType="mvo">
+		select * from member where email = #{email}
+	</select>
+	<select id="selectAuthList" resultType="avo">
+		select * from auth_member where email = #{email}
+	</select>
+	<select id="selectList" parameterType="pgvo" resultType="mvo">
+		select a.email, nick_name, reg_at, last_login, grade from
+		(select email from member where 1=1 <include refid="search" /> order by reg_at desc limit #{pageStart}, #{qty}) a left join member b on a.email = b.email
+	</select>
+	<select id="selectOne" resultType="mvo">
+		select * from member
+		<include refid="wh_email" />
+	</select>
+	<select id="selectEmail">
+		select count(email) from member
+		<include refid="wh_email" />
+	</select>
+	<select id="selectTotalCount" resultType="int">
+		select count(email) from member where 1=1 <include refid="search" />
+	</select>
+	<update id="update" parameterType="mvo">
+		update member set grade = #{grade}, nick_name = #{nickName}, pwd =
+		#{pwd}
+		<include refid="wh_email" />
+	</update>
+	<update id="updateLastLogin">
+		update member set last_login = now() where email = #{email}
+	</update>
+	<delete id="delete">
+		delete from member
+		<include refid="wh_email" />
+	</delete>
+</mapper>
