@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.www.repository.BoardDAO">
+	<sql id="wh_bno">
+		where bno = #{bno}
+	</sql>
+	<sql id="search">
+		<if test="type!=null">
+			<trim prefix="and (" suffix=")" prefixOverrides="or">
+				<foreach collection="typeToArray" item="type">
+					<trim prefix="or">
+						<choose>
+							<when test="type=='t'.toString()">
+								title like concat('%', #{kw}, '%')
+							</when>
+							<when test="type=='c'.toString()">
+								category like concat('%', #{kw}, '%')
+							</when>
+							<when test="type=='d'.toString()">
+								description like concat('%', #{kw}, '%')
+							</when>
+						</choose>
+					</trim>
+				</foreach>
+			</trim>
+		</if>
+	</sql>
+	<insert id="insert" parameterType="bvo">
+		insert into board(category, title, writer, description, file_count) values(#{category}, #{title}, #{writer}, #{description}, #{fileCount})
+	</insert>
+	<select id="selectList" parameterType="pgvo" resultType="bvo">
+		select a.bno, category, title, writer, mod_at, read_count, cmt_qty, file_count from (select bno from board where bno > 0
+		<include refid="search" /> order by bno desc limit #{pageStart}, #{qty}) a left join board b on a.bno = b.bno
+	</select>
+	<select id="selectOne" resultType="bvo">
+		select * from board <include refid="wh_bno" />
+	</select>
+	<select id="selectTotalCount" parameterType="pgvo" resultType="int">
+		select count(bno) from board where bno > 0 <include refid="search" />
+	</select>
+	<select id="selectLastBno" resultType="long">
+		select max(bno) from board
+	</select>
+	<update id="update" parameterType="bvo">
+		update board set category = #{category}, title = #{title}, description = #{description},
+		mod_at = now(), file_count = file_count + #{fileCount} <include refid="wh_bno" />
+	</update>
+	<update id="updateReadCount">
+		update board set read_count = read_count + #{i} <include refid="wh_bno" /> 
+	</update>
+	<update id="updateCmtQty">
+		update board set cmt_qty = cmt_qty + #{i} <include refid="wh_bno" /> 
+	</update>
+	<delete id="delete">
+		delete from board <include refid="wh_bno" />
+	</delete>
+</mapper>
