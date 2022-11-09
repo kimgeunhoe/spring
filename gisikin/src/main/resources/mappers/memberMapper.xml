@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.www.repository.MemberDAO">
+	<insert id="insert" parameterType="mvo">
+		insert into member(email, pwd, nick_name) values (#{email}, #{pwd}, #{nickName})
+	</insert>
+	<select id="login" parameterType="mvo" resultType="mvo">
+		select email, nick_name, grade from member where email = #{email} and pwd = #{pwd}
+	</select>
+</mapper>
