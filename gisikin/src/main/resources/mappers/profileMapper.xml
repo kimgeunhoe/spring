@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.myweb.www.repository.ProfileDAO">
+	<insert id="insertProfile" parameterType="prvo">
+		insert into profile (uuid, save_dir, file_name, file_type, email, file_size) values(#{uuid}, #{saveDir}, #{fileName}, #{fileType}, #{email}, #{fileSize})
+	</insert>
+	<select id="selectProfile" parameterType="string" resultType="prvo">
+		select * from profile where email = #{email}
+	</select>
+	<delete id="deleteProfile" parameterType="string">
+		delete from profile where uuid = #{uuid} or email = #{uuid}
+	</delete>
+</mapper> 
